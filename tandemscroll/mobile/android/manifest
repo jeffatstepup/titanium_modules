@@ -1,0 +1,17 @@
+#
+# this is your module manifest and used by Titanium
+# during compilation, packaging, distribution, etc.
+#
+version: 1.0.0
+apiversion: 2
+description: tandemscroll
+author: Your Name
+license: Specify your license
+copyright: Copyright (c) 2014 by Your Company
+
+# these should not be edited
+name: tandemscroll
+moduleid: ti.tandemscroll
+guid: 87c5f050-c271-48c8-9b44-c0bf2d8a01b1
+platform: android
+minsdk: 3.2.3.GA
