@@ -28,11 +28,11 @@ public class TandemController
 		return mInDispatch;
 	}
 	
-	public void dispatchTandemScroll(int x, int y, int diff)
+	public void dispatchTandemScroll(int x, int y, int diff, int maxX, int maxY)
 	{
 		mInDispatch = true;
 		for(TandemListener view : mListeners){
-			view.tandemScroll(x, y * 2);
+			view.tandemScroll(x, y, maxX, maxY);
 		}
 	    mInDispatch = false;
 	}
@@ -43,5 +43,5 @@ interface TandemListener
 {
 	public boolean registerTandemListener(TandemListener listener);
 	public boolean unregisterTandemListener(TandemListener listener);
-	public void tandemScroll(int x, int y);
+	public void tandemScroll(int x, int y, int maxX, int maxY);
 }

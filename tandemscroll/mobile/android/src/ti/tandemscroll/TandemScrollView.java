@@ -35,6 +35,7 @@ public class TandemScrollView extends TiUIView
 
 	private static final String TAG = "TiUIScrollView";
 	private int offsetX = 0, offsetY = 0;
+	private int myMaxScrollX = 0, myMaxScrollY = 0;
 	private boolean setInitialOffset = false;
 	private boolean mScrollingEnabled = true;
 
@@ -99,7 +100,7 @@ public class TandemScrollView extends TiUIView
 			}
 			return AUTO;
 		}
-
+    
 		@Override
 		protected int getWidthMeasureSpec(View child)
 		{
@@ -161,6 +162,7 @@ public class TandemScrollView extends TiUIView
 		private TiScrollViewLayout layout;
 
 		private TandemController mTandem = new TandemController();
+        private final float scale = getContext().getResources().getDisplayMetrics().density / 160f;
 
 		public TiVerticalScrollView(Context context, LayoutArrangement arrangement)
 		{
@@ -213,6 +215,7 @@ public class TandemScrollView extends TiUIView
 			super.onDraw(canvas);
 			// setting offset once when this view is visible
 			if (!setInitialOffset) {
+                Log.d(TAG, "Scroll to initial offset: " + offsetY);
 				scrollTo(offsetX, offsetY);
 				setInitialOffset = true;
 			}
@@ -222,12 +225,9 @@ public class TandemScrollView extends TiUIView
 		@Override
 		protected void onScrollChanged(int l, int t, int oldl, int oldt)
 		{
-		
-			//dispatch this scroll event first
-			mTandem.dispatchTandemScroll(l, t, oldt -t);
-			
+			mTandem.dispatchTandemScroll(l, t, oldt -t, myMaxScrollX, myMaxScrollY);
+            
 			super.onScrollChanged(l, t, oldl, oldt);
-			
 			
 			KrollDict data = new KrollDict();
 			data.put(TiC.EVENT_PROPERTY_X, l);
@@ -264,7 +264,9 @@ public class TandemScrollView extends TiUIView
 				int childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
 				child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
 
-			}
+                myMaxScrollY = getChildAt(0).getHeight() - getHeight();
+                myMaxScrollX = child.getWidth() - getWidth();
+            }
 		}
 
 		@Override
@@ -277,14 +279,18 @@ public class TandemScrollView extends TiUIView
 
 		}
 
-
 		@Override
-		public void tandemScroll(int x, int y) {
+		public void tandemScroll(int x, int y, int maxX, int maxY) {
+            
+            int newPos = (int) ((float)y / (float)maxY * (float)(getChildAt(0).getHeight() - getHeight()));
+
 			if(!mTandem.isInDispatch()){
-				onOverScrolled(x, y, true, true);
-				//overScrolled seems to work better than scrollTo
-				//scrollTo(x, y);					
-			}			
+                Log.d(TAG, "****TandemScroll y: " + y  +  " maxY: " + maxY + " myMaxScrollY :" + myMaxScrollY  + " newPos:" + newPos, Log.DEBUG_MODE);
+                
+				// overScrolled seems to work better than scrollTo
+                // scrollTo(x, newPos);
+				onOverScrolled(x, newPos, true, true);
+			}
 		}
 	}
 
@@ -408,7 +414,7 @@ public class TandemScrollView extends TiUIView
 		}
 
 		@Override
-		public void tandemScroll(int x, int y) {
+		public void tandemScroll(int x, int y, int maxX, int maxY) {
 			if(!mTandem.isInDispatch()){
 				//scrollTo(x, y);
 				onOverScrolled(x, y, true, true);
